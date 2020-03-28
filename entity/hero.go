@@ -1,5 +1,7 @@
 package entity
 
+import "math/rand"
+
 const defaultHeroAge = 18
 const defaultHeroHealth = 25
 
@@ -46,6 +48,18 @@ func (c *Hero) Step() {
 		c.nage = 0
 		c.age++
 	}
+
+	pos := rand.Intn(4)
+	switch pos {
+	case 0:
+		c.Up()
+	case 1:
+		c.Down()
+	case 2:
+		c.Left()
+	case 3:
+		c.Right()
+	}
 }
 
 func (c *Hero) SetPos(x, y int) {
@@ -54,4 +68,17 @@ func (c *Hero) SetPos(x, y int) {
 
 func (c Hero) Pos() (int, int) {
 	return c.x, c.y
+}
+
+func (c *Hero) Up() {
+	c.y += 1
+}
+func (c *Hero) Down() {
+	c.y -= 1
+}
+func (c *Hero) Left() {
+	c.x -= 1
+}
+func (c *Hero) Right() {
+	c.x += 1
 }
