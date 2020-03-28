@@ -1,10 +1,14 @@
 package world
 
 import (
+	"encoding/json"
+	"fmt"
+	"os"
 	"sync"
 )
 
 var worldWidth, worldHeight = 0, 0
+
 // PosZone is ID of each zone.
 // The map is an X*Y field. In my opinion, using a slice is inconvenient,
 // so the values will be stored in map[PosZone]zoneInfo.
@@ -25,20 +29,20 @@ const (
 // Zone contains information about all cells and provides methods for working with them
 type Zone struct {
 	zMux sync.RWMutex
-	z map[PosZone]zoneInfo
+	z    map[PosZone]zoneInfo
 }
 
 // zoneInfo contains information about the cell
 type zoneInfo struct {
-	X int
-	Y int
+	X    int
+	Y    int
 	Meta string
 	Type int
 }
 
 // calcZone calculates PosZone
 func calcZone(x, y int) PosZone {
-	return PosZone(x * worldWidth * worldHeight * 2 + y * worldWidth * worldHeight * 3)
+	return PosZone(x*worldWidth*worldHeight*2 + y*worldWidth*worldHeight*3)
 }
 
 // zone gets zone info
@@ -46,6 +50,7 @@ func (z *Zone) zone(x, y int) zoneInfo {
 	z.zMux.RLock()
 	info := z.z[calcZone(x, y)]
 	z.zMux.RUnlock()
+	fmt.Println(x, y, info.X, info.Y, info.Type)
 	return info
 }
 
@@ -79,7 +84,7 @@ func (z *Zone) Type(x, y int) int {
 func NewZone() *Zone {
 	return &Zone{
 		zMux: sync.RWMutex{},
-		z: make(map[PosZone]zoneInfo),
+		z:    make(map[PosZone]zoneInfo),
 	}
 }
 
@@ -87,7 +92,7 @@ func NewZone() *Zone {
 // Each cell is a separate object.
 // The world structure combines them
 type World struct {
-	Zone *Zone
+	Zone          *Zone
 	width, height int
 }
 
@@ -111,4 +116,48 @@ func (w *World) CreateLand() {
 			})
 		}
 	}
+}
+
+type ExportZone struct {
+	X    int `json:"x"`
+	Y    int `json:"y"`
+	Type int `json:"type"`
+}
+
+type ExportData struct {
+	Width  int          `json:"width"`
+	Height int          `json:"height"`
+	Zones  []ExportZone `json:"zones"`
+}
+
+func (w *World) ExportToJSON(filename string) error {
+	f, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	exportData := ExportData{
+		Width:  w.width,
+		Height: w.height,
+	}
+
+	for y := 0; y < worldHeight; y++ {
+		for x := 0; x < worldWidth; x++ {
+			info := w.Zone.zone(x, y)
+			exportData.Zones = append(exportData.Zones, ExportZone{
+				X:    x,
+				Y:    y,
+				Type: info.Type,
+			})
+		}
+	}
+
+	b, err := json.Marshal(exportData)
+	if err != nil {
+		return err
+	}
+
+	_, err = f.Write(b)
+	return err
 }
