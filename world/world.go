@@ -4,8 +4,7 @@ import (
 	"sync"
 )
 
-const worldWidth, worldHeight = 100, 100
-
+var worldWidth, worldHeight = 0, 0
 // PosZone is ID of each zone.
 // The map is an X*Y field. In my opinion, using a slice is inconvenient,
 // so the values will be stored in map[PosZone]zoneInfo.
@@ -17,12 +16,11 @@ const worldWidth, worldHeight = 100, 100
 // PosZone = 5 * 100 * 50 * 2 + 6 * 100 * 50 * 3
 type PosZone int
 
-// World is main data when saves info
-// Each cell is a separate object.
-// The world structure combines them
-type World struct {
-	Zone *Zone
-}
+// Field types
+const (
+	TypeZoneEmpty = iota
+	TypeZoneLand
+)
 
 // Zone contains information about all cells and provides methods for working with them
 type Zone struct {
@@ -35,6 +33,7 @@ type zoneInfo struct {
 	X int
 	Y int
 	Meta string
+	Type int
 }
 
 // calcZone calculates PosZone
@@ -52,6 +51,9 @@ func (z *Zone) zone(x, y int) zoneInfo {
 
 // setZone sets zone info
 func (z *Zone) setZone(x, y int, info zoneInfo) {
+	if x < 0 || x > worldWidth || y < 0 || y > worldHeight {
+		return
+	}
 	z.zMux.Lock()
 	z.z[calcZone(x, y)] = info
 	z.zMux.Unlock()
@@ -69,6 +71,10 @@ func (z *Zone) SetMeta(x, y int, v string) {
 	z.setZone(x, y, zone)
 }
 
+func (z *Zone) Type(x, y int) int {
+	return z.zone(x, y).Type
+}
+
 // NewZone creates new zone
 func NewZone() *Zone {
 	return &Zone{
@@ -77,9 +83,32 @@ func NewZone() *Zone {
 	}
 }
 
+// World is main data when saves info
+// Each cell is a separate object.
+// The world structure combines them
+type World struct {
+	Zone *Zone
+	width, height int
+}
+
 // NewWorld creates new world
-func NewWorld() *World {
+func NewWorld(width, height int) *World {
+	worldWidth, worldHeight = width, height
 	return &World{
-		Zone: NewZone(),
+		Zone:   NewZone(),
+		width:  width,
+		height: height,
+	}
+}
+
+func (w *World) CreateLand() {
+	for y := 0; y < worldHeight; y++ {
+		for x := 0; x < worldWidth; x++ {
+			w.Zone.setZone(x, y, zoneInfo{
+				X:    x,
+				Y:    y,
+				Type: TypeZoneLand,
+			})
+		}
 	}
 }
