@@ -9,6 +9,7 @@ type Hero struct {
 	age    int
 	nage   int // number of months before your birthday
 	health int
+	x, y   int
 }
 
 func NewHero(name string) *Hero {
@@ -45,4 +46,12 @@ func (c *Hero) Step() {
 		c.nage = 0
 		c.age++
 	}
+}
+
+func (c *Hero) SetPos(x, y int) {
+	c.x, c.y = x, y
+}
+
+func (c Hero) Pos() (int, int) {
+	return c.x, c.y
 }

@@ -1,6 +1,7 @@
 package world_test
 
 import (
+	"github.com/DiscoreMe/magic-world/entity"
 	"github.com/DiscoreMe/magic-world/world"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -31,6 +32,12 @@ func TestWorld(t *testing.T) {
 		assert.Equal(t, arg.V, w.Zone.Meta(arg.X, arg.Y))
 		assert.Equal(t, arg.wantType, w.Zone.Type(arg.X, arg.Y))
 	}
+
+	hero := entity.NewHero("Demian")
+	w.AddEntity(worldWidth/2, worldHeight/2, hero)
+
+	hero2 := entity.NewHero("Nikita")
+	w.AddEntity(worldWidth/2+1, worldHeight/2-1, hero2)
 
 	assert.NoError(t, w.ExportToJSON("test.world"))
 }

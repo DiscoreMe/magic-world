@@ -5,6 +5,8 @@ type Entity interface {
 	Name() string
 	Health() int
 	Step()
+	SetPos(int, int)
+	Pos() (int, int)
 }
 
 var lastEntityID int64 = 0

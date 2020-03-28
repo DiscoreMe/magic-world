@@ -2,7 +2,7 @@ package world
 
 import (
 	"encoding/json"
-	"fmt"
+	entity2 "github.com/DiscoreMe/magic-world/entity"
 	"os"
 	"sync"
 )
@@ -31,10 +31,11 @@ type Zone struct {
 
 // zoneInfo contains information about the cell
 type zoneInfo struct {
-	X    int
-	Y    int
-	Meta string
-	Type int
+	X        int
+	Y        int
+	Meta     string
+	Type     int
+	Entities []entity2.Entity
 }
 
 // calcZone calculates PosZone
@@ -47,7 +48,6 @@ func (z *Zone) zone(x, y int) zoneInfo {
 	z.zMux.RLock()
 	info := z.z[calcZone(x, y)]
 	z.zMux.RUnlock()
-	fmt.Println(x, y, info.X, info.Y, info.Type)
 	return info
 }
 
@@ -77,6 +77,12 @@ func (z *Zone) Type(x, y int) int {
 	return z.zone(x, y).Type
 }
 
+func (z *Zone) addEntity(x, y int, entity entity2.Entity) {
+	zone := z.zone(x, y)
+	zone.Entities = append(zone.Entities, entity)
+	z.setZone(x, y, zone)
+}
+
 // NewZone creates new zone
 func NewZone() *Zone {
 	return &Zone{
@@ -91,6 +97,8 @@ func NewZone() *Zone {
 type World struct {
 	Zone          *Zone
 	width, height int
+	herMux        sync.RWMutex
+	Heroes        []*entity2.Hero
 }
 
 // NewWorld creates new world
@@ -104,6 +112,8 @@ func NewWorld(width, height int) *World {
 		Zone:   NewZone(),
 		width:  width,
 		height: height,
+		herMux: sync.RWMutex{},
+		Heroes: make([]*entity2.Hero, 0),
 	}
 }
 
@@ -119,16 +129,32 @@ func (w *World) CreateLand() {
 	}
 }
 
+func (w *World) AddEntity(x, y int, entity entity2.Entity) {
+	entity.SetPos(x, y)
+	switch v := entity.(type) {
+	case *entity2.Hero:
+		w.Heroes = append(w.Heroes, v)
+	default:
+		w.Zone.addEntity(x, y, entity)
+	}
+}
+
 type ExportZone struct {
-	X    int `json:"x"`
-	Y    int `json:"y"`
-	Type int `json:"type"`
+	X        int            `json:"x"`
+	Y        int            `json:"y"`
+	Type     int            `json:"type"`
+	Entities []ExportEntity `json:"entities,omitempty"`
+}
+
+type ExportEntity struct {
+	ID   int64  `json:"id"`
+	Name string `json:"name"`
 }
 
 type ExportData struct {
 	Width  int          `json:"width"`
 	Height int          `json:"height"`
-	Zones  []ExportZone `json:"zones"`
+	Zones  []ExportZone `json:"zones,omitempty"`
 }
 
 func (w *World) ExportToJSON(filename string) error {
@@ -146,11 +172,29 @@ func (w *World) ExportToJSON(filename string) error {
 	for y := 0; y < worldHeight; y++ {
 		for x := 0; x < worldWidth; x++ {
 			info := w.Zone.zone(x, y)
-			exportData.Zones = append(exportData.Zones, ExportZone{
+			zone := ExportZone{
 				X:    x,
 				Y:    y,
 				Type: info.Type,
-			})
+			}
+			for _, ent := range info.Entities {
+				zone.Entities = append(zone.Entities, ExportEntity{
+					ID:   ent.ID(),
+					Name: ent.Name(),
+				})
+			}
+
+			for _, h := range w.Heroes {
+				xh, yh := h.Pos()
+				if x == xh && y == yh {
+					zone.Entities = append(zone.Entities, ExportEntity{
+						ID:   h.ID(),
+						Name: h.Name(),
+					})
+				}
+			}
+
+			exportData.Zones = append(exportData.Zones, zone)
 		}
 	}
 

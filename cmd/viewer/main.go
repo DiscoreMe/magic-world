@@ -38,6 +38,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			case world.TypeZoneLand:
 				s = "🌳"
 			}
+
+			if zones[x][y].Entities != nil {
+				s = "🙆🏻"
+			}
+
 			_, _ = w.Write([]byte(s))
 		}
 		_, _ = w.Write([]byte("\n"))
