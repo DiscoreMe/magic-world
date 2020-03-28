@@ -8,16 +8,13 @@ import (
 )
 
 var worldWidth, worldHeight = 0, 0
+var maxWorldSize = 0
 
 // PosZone is ID of each zone.
 // The map is an X*Y field. In my opinion, using a slice is inconvenient,
 // so the values will be stored in map[PosZone]zoneInfo.
 // To avoid confusing positions, there is a formula that calculates the PosZone coordinate:
-// X = X * width_field * height_field * 2
-// Y = Y * width_field * height_field * 3
-//
-// For example, we need to get data for coordinates 5 and 6, and the field size is 100 by 50:
-// PosZone = 5 * 100 * 50 * 2 + 6 * 100 * 50 * 3
+// x * worldHeight + y
 type PosZone int
 
 // Field types
@@ -42,7 +39,7 @@ type zoneInfo struct {
 
 // calcZone calculates PosZone
 func calcZone(x, y int) PosZone {
-	return PosZone(x*worldWidth*worldHeight*2 + y*worldWidth*worldHeight*3)
+	return PosZone(x*maxWorldSize + y)
 }
 
 // zone gets zone info
@@ -99,6 +96,10 @@ type World struct {
 // NewWorld creates new world
 func NewWorld(width, height int) *World {
 	worldWidth, worldHeight = width, height
+	maxWorldSize = width
+	if height > width {
+		maxWorldSize = height
+	}
 	return &World{
 		Zone:   NewZone(),
 		width:  width,
