@@ -18,6 +18,7 @@ func (s *Server) Listen(endpoint string) error {
 
 	zone := e.Group("zone")
 	zone.GET("/cells", s.ZoneCells)
+	zone.GET("/types", s.ZoneTypes)
 
 	return e.Start(endpoint)
 }
