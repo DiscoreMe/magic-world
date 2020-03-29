@@ -2,14 +2,19 @@ package world
 
 import (
 	"sync"
+	"time"
 
 	"github.com/DiscoreMe/magic-world/entity"
+	"github.com/aquilax/go-perlin"
 )
 
 // Field types
 const (
 	ZoneTypeEmpty = iota
+	ZoneTypeWater
 	ZoneTypeLand
+	ZoneTypeStone
+	ZoneTypeMax
 )
 
 // Zone contains information about all cells and provides methods for working with them
@@ -37,9 +42,15 @@ func NewZone(width, height int) *Zone {
 		maxSide: maxSide,
 	}
 
+	const alpha, beta, n = 2., 2., 3
+	const oldMin, oldMax = -10, 10
+	gen := perlin.NewPerlin(alpha, beta, n, time.Now().Unix())
+
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
-			zone.SetCell(x, y, ZoneCell{Type: ZoneTypeLand})
+			noise := int(gen.Noise2D(float64(x)/10, float64(y)/10) * 10)
+			ztype := convertRange(noise, oldMin, oldMax, ZoneTypeEmpty+1, ZoneTypeMax)
+			zone.SetCell(x, y, ZoneCell{Type: ztype})
 		}
 	}
 
