@@ -8,10 +8,8 @@ import (
 )
 
 func main() {
-	hero := entity.NewHero("Nikita")
-
 	w := world.NewWorld(30, 15)
-	w.AddEntity(0, 0, hero)
+	w.AddEntity(0, 0, entity.NewHero("Nikita"))
 
 	for {
 		w.Step()

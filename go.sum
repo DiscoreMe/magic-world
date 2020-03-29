@@ -1,3 +1,5 @@
+github.com/aquilax/go-perlin v0.0.0-20191229124216-0af9ce917c28 h1:iQUvYFmTKLXaDf3N0YfsJG5vgVtA1La82fHFDkpX5y4=
+github.com/aquilax/go-perlin v0.0.0-20191229124216-0af9ce917c28/go.mod h1:z9Rl7EM4BZY0Ikp2fEN1I5mKSOJ26HQpk0O2TBdN2HE=
 github.com/brianvoe/gofakeit v3.18.0+incompatible h1:wDOmHc9DLG4nRjUVVaxA+CEglKOW72Y5+4WNxUIkjM8=
 github.com/brianvoe/gofakeit v3.18.0+incompatible/go.mod h1:kfwdRA90vvNhPutZWfH7WPaDzUjz+CZFqG+rPkOjGOc=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
