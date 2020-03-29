@@ -12,43 +12,43 @@ import (
 func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "<div>")
 
-	bytes, err := ioutil.ReadFile(r.URL.Path[1:])
+	data, err := ioutil.ReadFile(r.URL.Path[1:])
 	if err != nil {
 		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
 
-	var exportData world.ExportData
-	if err := json.Unmarshal(bytes, &exportData); err != nil {
+	var exportWorld world.ExportWorld
+	if err := json.Unmarshal(data, &exportWorld); err != nil {
 		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
 
-	_, _ = fmt.Fprintf(w, "%d days later<br>", exportData.Days)
+	_, _ = fmt.Fprintf(w, "%d days later<br>", exportWorld.Days)
 
-	zones := make([][]world.ExportZone, exportData.Width)
-	for i := range zones {
-		points := make([]world.ExportZone, exportData.Height)
-		zones[i] = points
+	zone := make([][]world.ExportCell, exportWorld.Width)
+	for i := range zone {
+		cells := make([]world.ExportCell, exportWorld.Height)
+		zone[i] = cells
 	}
 
-	for _, zone := range exportData.Zones {
-		zones[zone.X][zone.Y] = zone
+	for _, cell := range exportWorld.Cells {
+		zone[cell.X][cell.Y] = cell
 	}
 
 	entities := make([][]world.ExportEntity, 0)
+	for y := 0; y < exportWorld.Height; y++ {
+		for x := 0; x < exportWorld.Width; x++ {
+			var s string
 
-	for y := 0; y < exportData.Height; y++ {
-		for x := 0; x < exportData.Width; x++ {
-			var s string = " "
-			switch zones[x][y].Type {
-			case world.TypeZoneLand:
+			switch zone[x][y].Type {
+			case world.ZoneTypeLand:
 				s = fmt.Sprintf(`<img src="%s"/>`, picLand)
 			}
 
-			if zones[x][y].Entities != nil {
+			if len(zone[x][y].Entities) > 0 {
 				s = fmt.Sprintf(`<img src="%s"/>`, picHero)
-				entities = append(entities, zones[x][y].Entities)
+				entities = append(entities, zone[x][y].Entities)
 			}
 
 			_, _ = fmt.Fprint(w, s)

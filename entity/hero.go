@@ -5,104 +5,79 @@ import "math/rand"
 const defaultHeroAge = 18
 const defaultHeroHealth = 25
 
+// Hero describes hero entity
 type Hero struct {
 	id     int64
 	name   string
-	age    int
-	nage   int // number of months before your birthday
-	health int
 	x, y   int
+	health int
+
+	age  int
+	nage int // number of months before your birthday
 }
 
+func (h *Hero) X() int {
+	return h.x
+}
+
+func (h *Hero) Y() int {
+	return h.y
+}
+
+func (h *Hero) SetX(x int) {
+	h.x = x
+}
+
+func (h *Hero) SetY(y int) {
+	h.y = y
+}
+
+// NewHero creates new hero with default params
 func NewHero(name string) *Hero {
 	return &Hero{
-		id:     nextEntityID(),
+		id:     nextEntityID.Inc(),
 		name:   name,
 		age:    defaultHeroAge,
 		health: defaultHeroHealth,
 	}
 }
 
-// ID gets character ID
-func (c Hero) ID() int64 {
-	return c.id
+// ID returns hero's ID
+func (h Hero) ID() int64 {
+	return h.id
 }
 
-// Name gets name ID Hero
-func (c Hero) Name() string {
-	return c.name
+// Name returns hero's name
+func (h Hero) Name() string {
+	return h.name
 }
 
-// Age gets age Hero
-func (c Hero) Age() int {
-	return c.age
+// Health returns hero's health
+func (h Hero) Health() int {
+	return h.health
 }
 
-func (c Hero) Health() int {
-	return c.health
+// Age returns hero's age
+func (h Hero) Age() int {
+	return h.age
 }
 
-func (c *Hero) Step() {
-	c.nage += 1
-	if c.nage >= 365 {
-		c.nage = 0
-		c.age++
+func (h *Hero) Step() {
+	h.nage += 1
+	if h.nage >= 365 {
+		h.nage = 0
+		h.age++
 	}
 
-	c.randMove()
-}
-
-func (c *Hero) randMove() {
 	pos := rand.Intn(4)
 	switch pos {
 	case 0:
-		c.Up()
+		Up(h)
 	case 1:
-		c.Down()
+		Down(h)
 	case 2:
-		c.Left()
+		Left(h)
 	case 3:
-		c.Right()
-	}
-}
-
-func (c *Hero) SetPos(x, y int) {
-	c.x, c.y = x, y
-}
-
-func (c Hero) Pos() (int, int) {
-	return c.x, c.y
-}
-
-func (c *Hero) Up() {
-	c.y -= 1
-}
-func (c *Hero) Down() {
-	c.y += 1
-}
-func (c *Hero) Left() {
-	c.x -= 1
-}
-func (c *Hero) Right() {
-	c.x += 1
-}
-
-type HeroAround struct {
-	UpX, UpY       int
-	DownX, DownY   int
-	LeftX, LeftY   int
-	RightX, RightY int
-}
-
-func (c *Hero) Around() HeroAround {
-	return HeroAround{
-		UpX:    c.x,
-		UpY:    c.y + 1,
-		DownX:  c.x,
-		DownY:  c.y - 1,
-		LeftX:  c.x - 1,
-		LeftY:  c.y,
-		RightX: c.x + 1,
-		RightY: c.y,
+		Right(h)
 	}
 }
