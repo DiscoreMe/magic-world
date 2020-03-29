@@ -24,6 +24,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	_, _ = fmt.Fprintf(w, "%d days later<br>", exportData.Days)
+
 	zones := make([][]world.ExportZone, exportData.Width)
 	for i := range zones {
 		points := make([]world.ExportZone, exportData.Height)
@@ -49,15 +51,15 @@ func handler(w http.ResponseWriter, r *http.Request) {
 				entities = append(entities, zones[x][y].Entities)
 			}
 
-			fmt.Fprint(w, s)
+			_, _ = fmt.Fprint(w, s)
 		}
-		fmt.Fprint(w, "<br>")
+		_, _ = fmt.Fprint(w, "<br>")
 	}
-	fmt.Fprintln(w, "<hr>")
+	_, _ = fmt.Fprintln(w, "<hr>")
 
 	for _, z := range entities {
 		for _, e := range z {
-			fmt.Fprintf(w, "[ID:%d] %s [X:%d;Y:%d]<br>", e.ID, e.Name, e.X, e.Y)
+			_, _ = fmt.Fprintf(w, "[ID:%d] %s [X:%d;Y:%d]<br>", e.ID, e.Name, e.X, e.Y)
 		}
 	}
 }

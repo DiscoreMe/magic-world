@@ -56,6 +56,8 @@ func (z *Zone) setZone(x, y int, info zoneInfo) {
 	if x < 0 || x > worldWidth || y < 0 || y > worldHeight {
 		return
 	}
+	info.X = x
+	info.Y = y
 	z.zMux.Lock()
 	z.z[calcZone(x, y)] = info
 	z.zMux.Unlock()
@@ -99,6 +101,7 @@ type World struct {
 	width, height int
 	herMux        sync.RWMutex
 	Heroes        []*entity2.Hero
+	days          int64
 }
 
 // NewWorld creates new world
@@ -149,9 +152,12 @@ type ExportZone struct {
 type ExportEntity struct {
 	ID   int64  `json:"id"`
 	Name string `json:"name"`
+	X    int    `json:"x"`
+	Y    int    `json:"y"`
 }
 
 type ExportData struct {
+	Days   int64        `json:"days"`
 	Width  int          `json:"width"`
 	Height int          `json:"height"`
 	Zones  []ExportZone `json:"zones,omitempty"`
@@ -167,6 +173,7 @@ func (w *World) ExportToJSON(filename string) error {
 	exportData := ExportData{
 		Width:  w.width,
 		Height: w.height,
+		Days:   w.days,
 	}
 
 	for y := 0; y < worldHeight; y++ {
@@ -190,6 +197,8 @@ func (w *World) ExportToJSON(filename string) error {
 					zone.Entities = append(zone.Entities, ExportEntity{
 						ID:   h.ID(),
 						Name: h.Name(),
+						X:    x,
+						Y:    y,
 					})
 				}
 			}
@@ -205,4 +214,25 @@ func (w *World) ExportToJSON(filename string) error {
 
 	_, err = f.Write(b)
 	return err
+}
+
+func (w *World) Days() int64 {
+	return w.days
+}
+
+func (w *World) Step() {
+	w.days++
+	for _, hero := range w.Heroes {
+		hero.Step()
+		aroundPos := hero.Around()
+		if aroundPos.UpY < 0 {
+			hero.Down()
+		} else if aroundPos.DownY >= w.height {
+			hero.Up()
+		} else if aroundPos.RightX >= w.width {
+			hero.Left()
+		} else if aroundPos.LeftX < 0 {
+			hero.Right()
+		}
+	}
 }

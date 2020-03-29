@@ -33,11 +33,8 @@ func TestWorld(t *testing.T) {
 		assert.Equal(t, arg.wantType, w.Zone.Type(arg.X, arg.Y))
 	}
 
-	hero := entity.NewHero("Demian")
+	hero := entity.NewHero("Test")
 	w.AddEntity(worldWidth/2, worldHeight/2, hero)
-
-	hero2 := entity.NewHero("Nikita")
-	w.AddEntity(worldWidth/2+1, worldHeight/2-1, hero2)
 
 	assert.NoError(t, w.ExportToJSON("test.world"))
 }

@@ -12,7 +12,7 @@ func main() {
 	w := world.NewWorld(worldWidth, worldHeight)
 	w.CreateLand()
 	hero := entity.NewHero("Nikita")
-	w.AddEntity(worldWidth/2, worldHeight/2, hero)
+	w.AddEntity(0, 0, hero)
 
 	for {
 		w.Step()
