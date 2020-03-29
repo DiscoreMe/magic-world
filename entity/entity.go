@@ -45,9 +45,9 @@ func Around(ent Entity) AroundPos {
 	x, y := ent.X(), ent.Y()
 	return AroundPos{
 		UpX:    x,
-		UpY:    y + 1,
+		UpY:    y - 1,
 		DownX:  x,
-		DownY:  y - 1,
+		DownY:  y + 1,
 		LeftX:  x - 1,
 		LeftY:  y,
 		RightX: x + 1,
