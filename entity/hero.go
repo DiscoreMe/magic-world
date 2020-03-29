@@ -7,13 +7,13 @@ const defaultHeroHealth = 25
 
 // Hero describes hero entity
 type Hero struct {
-	id   int64
-	name string
-	x, y int
-
-	age    int
-	nage   int // number of months before your birthday
+	id     int64
+	name   string
+	x, y   int
 	health int
+
+	age  int
+	nage int // number of months before your birthday
 }
 
 func (h *Hero) X() int {
@@ -52,14 +52,14 @@ func (h Hero) Name() string {
 	return h.name
 }
 
-// Age returns hero's age
-func (h Hero) Age() int {
-	return h.age
-}
-
 // Health returns hero's health
 func (h Hero) Health() int {
 	return h.health
+}
+
+// Age returns hero's age
+func (h Hero) Age() int {
+	return h.age
 }
 
 func (h *Hero) Step() {

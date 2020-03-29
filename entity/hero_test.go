@@ -11,7 +11,7 @@ import "testing"
 var hero *entity.Hero
 var heroName = gofakeit.Name()
 
-func TestNewHero(t *testing.T) {
+func init() {
 	hero = entity.NewHero(heroName)
 }
 
@@ -21,9 +21,7 @@ func TestHero_Name(t *testing.T) {
 
 func TestHero_Step(t *testing.T) {
 	age := hero.Age()
-	hero.Step()
-	assert.Equal(t, age, hero.Age())
-	for i := 0; i < 12; i++ {
+	for i := 0; i <= 365; i++ {
 		hero.Step()
 	}
 	assert.True(t, age < hero.Age())
