@@ -1,6 +1,7 @@
 package world
 
 import (
+	"math/rand"
 	"sync"
 	"time"
 
@@ -11,9 +12,10 @@ import (
 // Field types
 const (
 	ZoneTypeEmpty = iota
+	ZoneTypeStone
 	ZoneTypeWater
 	ZoneTypeLand
-	ZoneTypeStone
+	ZoneTypeForest
 	ZoneTypeMax
 )
 
@@ -40,6 +42,11 @@ func NewZone(width, height int) *Zone {
 		width:   width,
 		height:  height,
 		maxSide: maxSide,
+	}
+
+	for i := 0; i < width*height/4; i++ {
+		x, y := rand.Intn(width), rand.Intn(height)
+		zone.SetCell(x, y, ZoneCell{Type: ZoneTypeForest})
 	}
 
 	const alpha, beta, n = 2., 2., 3
