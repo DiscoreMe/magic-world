@@ -7,6 +7,7 @@ import (
 type Entity interface {
 	ID() int64
 	Name() string
+	Health() int
 	X() int
 	Y() int
 	SetX(int)
