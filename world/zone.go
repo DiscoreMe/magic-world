@@ -83,16 +83,19 @@ func (z *Zone) checkCoords(x, y int) bool {
 func (z *Zone) forEach(fn func(cell ZoneCell)) {
 	for x := 0; x < z.width; x++ {
 		for y := 0; y < z.height; y++ {
-			fn(z.Cell(x, y))
+			if cell, ok := z.Cell(x, y); ok {
+				fn(cell)
+			}
 		}
 	}
 }
 
 // Cell gets zone cell
-func (z *Zone) Cell(x, y int) ZoneCell {
+func (z *Zone) Cell(x, y int) (ZoneCell, bool) {
 	z.mux.RLock()
 	defer z.mux.RUnlock()
-	return z.z[z.pos(x, y)]
+	cell, ok := z.z[z.pos(x, y)]
+	return cell, ok
 }
 
 // SetCell sets zone info
@@ -112,6 +115,7 @@ func (z *Zone) SetCell(x, y int, cell ZoneCell) {
 
 // AddEntity adds new entity to the cell in specified coords
 func (z *Zone) AddEntity(x, y int, ent entity.Entity) {
-	cell := z.Cell(x, y)
-	cell.entities[ent.ID()] = ent
+	if cell, ok := z.Cell(x, y); ok {
+		cell.entities[ent.ID()] = ent
+	}
 }

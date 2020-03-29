@@ -42,7 +42,7 @@ func (w *World) ExportToJSON(filename string) error {
 
 	for y := 0; y < exportWorld.Height; y++ {
 		for x := 0; x < exportWorld.Width; x++ {
-			cell := w.zone.Cell(x, y)
+			cell, _ := w.zone.Cell(x, y)
 			exportCell := ExportCell{
 				X:    x,
 				Y:    y,

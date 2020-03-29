@@ -43,6 +43,7 @@ func (w *World) Step() {
 
 	w.days++
 
+	var defers []func()
 	w.zone.forEach(func(cell ZoneCell) {
 		for id, ent := range cell.entities {
 			ent.Step()
@@ -60,11 +61,19 @@ func (w *World) Step() {
 
 			x, y := ent.X(), ent.Y()
 			if x != cell.x || y != cell.y {
-				// change entity position
-				delete(cell.entities, id)
-				cell := w.zone.Cell(x, y)
-				cell.entities[id] = ent
+				defers = append(defers, func() {
+					// change entity position
+					// after all steps
+					delete(cell.entities, id)
+					if cell, ok := w.zone.Cell(x, y); ok {
+						cell.entities[id] = ent
+					}
+				})
 			}
 		}
 	})
+
+	for _, fn := range defers {
+		fn()
+	}
 }
