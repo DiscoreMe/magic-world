@@ -19,6 +19,13 @@ const (
 	ZoneTypeMax
 )
 
+var ZoneTypeNames = map[int]string{
+	ZoneTypeStone:  "stone",
+	ZoneTypeWater:  "water",
+	ZoneTypeLand:   "land",
+	ZoneTypeForest: "forest",
+}
+
 // Zone contains information about all cells and provides methods for working with them
 type Zone struct {
 	mux     sync.RWMutex

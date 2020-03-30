@@ -24,5 +24,5 @@ func TestWorld(t *testing.T) {
 	assert.NotEqual(t, x, hero.X())
 	assert.NotEqual(t, y, hero.Y())
 	assert.Equal(t, days+1, w.Days())
-	assert.NoError(t, w.ExportToJSON("test.world"))
+	assert.NoError(t, w.ExportToFile("test.world"))
 }

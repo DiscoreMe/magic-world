@@ -27,13 +27,7 @@ type ExportEntity struct {
 	Y    int    `json:"y"`
 }
 
-func (w *World) ExportToJSON(filename string) error {
-	f, err := os.Create(filename)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
+func (w *World) export() ExportWorld {
 	exportWorld := ExportWorld{
 		Width:  w.Width(),
 		Height: w.Height(),
@@ -62,11 +56,25 @@ func (w *World) ExportToJSON(filename string) error {
 		}
 	}
 
-	data, err := json.Marshal(exportWorld)
+	return exportWorld
+}
+
+func (w *World) ExportToJSON() ([]byte, error) {
+	return json.Marshal(w.export())
+}
+
+func (w *World) ExportToFile(filename string) error {
+	f, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	b, err := w.ExportToJSON()
 	if err != nil {
 		return err
 	}
 
-	_, err = f.Write(data)
+	_, err = f.Write(b)
 	return err
 }
