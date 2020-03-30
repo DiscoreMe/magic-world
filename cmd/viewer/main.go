@@ -7,12 +7,31 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 )
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "<div>")
+func loadConf() string {
+	host, port := os.Getenv("MG_HOST"), os.Getenv("MG_PORT")
+	if port == "" {
+		port = "7777"
+	}
+	return host + ":" + port
+}
 
-	data, err := ioutil.ReadFile(r.URL.Path[1:])
+func handler(w http.ResponseWriter, r *http.Request) {
+	_, _ = fmt.Fprintln(w, `<head><meta http-equiv="refresh" content="1"/></head>`)
+	_, _ = fmt.Fprintln(w, "<div>")
+
+	address := loadConf()
+
+	resp, err := http.Get("http://" + address + "/zone/cells")
+	if err != nil {
+		_, _ = w.Write([]byte(err.Error()))
+		return
+	}
+	defer resp.Body.Close()
+
+	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		_, _ = w.Write([]byte(err.Error()))
 		return
@@ -36,6 +55,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		zone[cell.X][cell.Y] = cell
 	}
 
+	var tmplImg = `<img style="border: 0.5px solid black;" src="%s"/>`
+
 	entities := make([][]world.ExportEntity, 0)
 	for y := 0; y < exportWorld.Height; y++ {
 		for x := 0; x < exportWorld.Width; x++ {
@@ -43,13 +64,13 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 			switch zone[x][y].Type {
 			case world.ZoneTypeWater:
-				s = fmt.Sprintf(`<img src="%s"/>`, picWater)
+				s = fmt.Sprintf(tmplImg, picWater)
 			case world.ZoneTypeLand:
-				s = fmt.Sprintf(`<img src="%s"/>`, picLand)
+				s = fmt.Sprintf(tmplImg, picLand)
 			case world.ZoneTypeStone:
-				s = fmt.Sprintf(`<img src="%s"/>`, picStone)
+				s = fmt.Sprintf(tmplImg, picStone)
 			case world.ZoneTypeForest:
-				s = fmt.Sprintf(`<img src="%s"/>`, picForest)
+				s = fmt.Sprintf(tmplImg, picForest)
 			}
 
 			if len(zone[x][y].Entities) > 0 {

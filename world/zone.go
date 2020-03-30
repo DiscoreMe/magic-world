@@ -115,6 +115,19 @@ func (z *Zone) forEach(fn func(cell ZoneCell)) {
 	}
 }
 
+func (z *Zone) forEachForest(fn func(cell ZoneCell)) {
+	for y := 0; y < z.height; y++ {
+		for x := 0; x < z.width; x++ {
+			if cell, ok := z.Cell(x, y); ok {
+				if cell.Type == ZoneTypeForest {
+					fn(cell)
+				}
+			}
+		}
+	}
+
+}
+
 // Cell gets zone cell
 func (z *Zone) Cell(x, y int) (ZoneCell, bool) {
 	z.mux.RLock()
@@ -136,6 +149,14 @@ func (z *Zone) SetCell(x, y int, cell ZoneCell) {
 	cell.entities = make(map[int64]entity.Entity)
 
 	z.z[z.pos(x, y)] = cell
+}
+
+func (z *Zone) IsZoneType(x, y, typeZone int) bool {
+	cell, exist := z.Cell(x, y)
+	if !exist {
+		return exist
+	}
+	return cell.Type == typeZone
 }
 
 // AddEntity adds new entity to the cell in specified coords

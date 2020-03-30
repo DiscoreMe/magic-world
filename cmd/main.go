@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/brianvoe/gofakeit"
 	"log"
 	"os"
 	"sync"
@@ -21,7 +22,9 @@ func loadConf() string {
 
 func main() {
 	w := world.NewWorld(30, 15)
-	w.AddEntity(0, 0, entity.NewHero("Nikita"))
+	for i := 0; i < 3; i++ {
+		w.AddEntity(0, 0, entity.NewHero(gofakeit.FirstName()))
+	}
 
 	var wg sync.WaitGroup
 

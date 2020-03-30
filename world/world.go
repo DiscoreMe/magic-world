@@ -1,7 +1,10 @@
 package world
 
 import (
+	"fmt"
+	"math/rand"
 	"sync"
+	"time"
 
 	"github.com/DiscoreMe/magic-world/entity"
 )
@@ -69,6 +72,33 @@ func (w *World) Step() {
 						cell.entities[id] = ent
 					}
 				})
+			}
+		}
+	})
+
+	w.zone.forEachForest(func(cell ZoneCell) {
+		rn := int64(rand.Intn(10))
+		ln := time.Now().Unix() % 10
+		x, y := cell.X(), cell.Y()
+		cell.Type = ZoneTypeForest
+
+		type task struct {
+			x, y int
+		}
+		var tasks []task
+
+		if ln > rn {
+			tasks = append(tasks, task{x: x + 1, y: y})
+			tasks = append(tasks, task{x: x, y: y - 1})
+		} else {
+			tasks = append(tasks, task{x: x - 1, y: y})
+			tasks = append(tasks, task{x: x, y: y + 1})
+		}
+
+		for _, t := range tasks {
+			if w.zone.IsZoneType(t.x, t.y, ZoneTypeLand) {
+				fmt.Println(t.x, t.y)
+				w.zone.SetCell(t.x, t.y, cell)
 			}
 		}
 	})
