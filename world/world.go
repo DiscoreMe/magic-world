@@ -1,79 +1,79 @@
 package world
 
 import (
-	"sync"
-
-	"github.com/DiscoreMe/magic-world/entity"
+	"fmt"
+	"io/ioutil"
+	"path"
+	"time"
 )
 
-// World is main data when saves info
-// Each cell is a separate object.
-// The world structure combines them
+const maxDaysInYear = 65
+const DurationDay = 5 * time.Second
+
+var PathSaveWorld = path.Join("saves", "world.json")
+
 type World struct {
-	mux  sync.RWMutex
-	days int64
-	zone *Zone
+	days  int
+	years int
+
+	debug bool
 }
 
-func (w *World) Days() int64 {
+func NewWorld() *World {
+	return &World{
+		days:  1,
+		years: 1,
+		debug: true,
+	}
+}
+
+func (w *World) Days() int {
 	return w.days
 }
 
-func (w *World) Width() int {
-	return w.zone.width
+func (w *World) Years() int {
+	return w.years
 }
 
-func (w *World) Height() int {
-	return w.zone.height
+func debug(message string) {
+	fmt.Println(message)
 }
 
-// NewWorld creates new world
-func NewWorld(width, height int) *World {
-	return &World{zone: NewZone(width, height)}
-}
-
-// AddEntity adds new entity to the world
-func (w *World) AddEntity(x, y int, ent entity.Entity) {
-	w.zone.AddEntity(x, y, ent)
-}
-
-func (w *World) Step() {
-	w.mux.Lock()
-	defer w.mux.Unlock()
-
+func (w *World) NextDay() {
+	if w.days >= maxDaysInYear {
+		w.days = 1
+		w.years += 1
+	}
 	w.days++
 
-	var defers []func()
-	w.zone.forEach(func(cell ZoneCell) {
-		for id, ent := range cell.entities {
-			ent.Step()
-
-			around := entity.Around(ent)
-			if around.UpY < 0 {
-				entity.Down(ent)
-			} else if around.DownY >= w.Height() {
-				entity.Up(ent)
-			} else if around.RightX >= w.Width() {
-				entity.Left(ent)
-			} else if around.LeftX < 0 {
-				entity.Right(ent)
-			}
-
-			x, y := ent.X(), ent.Y()
-			if x != cell.x || y != cell.y {
-				defers = append(defers, func() {
-					// change entity position
-					// after all steps
-					delete(cell.entities, id)
-					if cell, ok := w.zone.Cell(x, y); ok {
-						cell.entities[id] = ent
-					}
-				})
-			}
-		}
-	})
-
-	for _, fn := range defers {
-		fn()
+	if w.debug {
+		debug(fmt.Sprintf("Current time: %d day, %d year", w.days, w.years))
 	}
+
+	// todo log error
+	w.Save()
+}
+
+func (w *World) Save() error {
+	if err := w.exportToFile(PathSaveWorld); err != nil {
+		return fmt.Errorf("export to file: %w", err)
+	}
+
+	return nil
+}
+
+func (w *World) Load(filepath string) error {
+	b, err := ioutil.ReadFile(PathSaveWorld)
+	if err != nil {
+		return fmt.Errorf("ioutil readfile: %w", err)
+	}
+	data, err := w.importFromBytes(b)
+	if err != nil {
+		return fmt.Errorf("import from bytes: %w", err)
+	}
+
+	w.days = data.Days
+	w.years = data.Years
+
+	return nil
 }

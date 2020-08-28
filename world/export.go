@@ -5,76 +5,36 @@ import (
 	"os"
 )
 
-type ExportWorld struct {
-	Days   int64        `json:"days"`
-	Width  int          `json:"width"`
-	Height int          `json:"height"`
-	Cells  []ExportCell `json:"cells,omitempty"`
+type exportWorld struct {
+	Days  int `json:"days"`
+	Years int `json:"years"`
 }
 
-type ExportCell struct {
-	X        int            `json:"x"`
-	Y        int            `json:"y"`
-	Type     int            `json:"type"`
-	Meta     string         `json:"meta,omitempty"`
-	Entities []ExportEntity `json:"entities,omitempty"`
-}
-
-type ExportEntity struct {
-	ID   int64  `json:"id"`
-	Name string `json:"name"`
-	X    int    `json:"x"`
-	Y    int    `json:"y"`
-}
-
-func (w *World) export() ExportWorld {
-	exportWorld := ExportWorld{
-		Width:  w.Width(),
-		Height: w.Height(),
-		Days:   w.days,
+func (w *World) exportToJSON() ([]byte, error) {
+	var exportData = exportWorld{
+		Days:  w.days,
+		Years: w.years,
 	}
-
-	for y := 0; y < exportWorld.Height; y++ {
-		for x := 0; x < exportWorld.Width; x++ {
-			cell, _ := w.zone.Cell(x, y)
-			exportCell := ExportCell{
-				X:    x,
-				Y:    y,
-				Type: cell.Type,
-				Meta: cell.Meta,
-			}
-			for _, ent := range cell.entities {
-				exportCell.Entities = append(exportCell.Entities, ExportEntity{
-					ID:   ent.ID(),
-					Name: ent.Name(),
-					X:    ent.X(),
-					Y:    ent.Y(),
-				})
-			}
-
-			exportWorld.Cells = append(exportWorld.Cells, exportCell)
-		}
-	}
-
-	return exportWorld
+	return json.Marshal(exportData)
 }
 
-func (w *World) ExportToJSON() ([]byte, error) {
-	return json.Marshal(w.export())
-}
-
-func (w *World) ExportToFile(filename string) error {
+func (w *World) exportToFile(filename string) error {
 	f, err := os.Create(filename)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
-	b, err := w.ExportToJSON()
+	b, err := w.exportToJSON()
 	if err != nil {
 		return err
 	}
 
 	_, err = f.Write(b)
 	return err
+}
+
+func (w *World) importFromBytes(b []byte) (exportWorld, error) {
+	var data exportWorld
+	return data, json.Unmarshal(b, &data)
 }

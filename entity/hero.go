@@ -1,7 +1,5 @@
 package entity
 
-import "math/rand"
-
 const defaultHeroAge = 18
 const defaultHeroHealth = 25
 
@@ -9,27 +7,10 @@ const defaultHeroHealth = 25
 type Hero struct {
 	id     int64
 	name   string
-	x, y   int
 	health int
 
 	age  int
 	nage int // number of months before your birthday
-}
-
-func (h *Hero) X() int {
-	return h.x
-}
-
-func (h *Hero) Y() int {
-	return h.y
-}
-
-func (h *Hero) SetX(x int) {
-	h.x = x
-}
-
-func (h *Hero) SetY(y int) {
-	h.y = y
 }
 
 // NewHero creates new hero with default params
@@ -63,21 +44,5 @@ func (h Hero) Age() int {
 }
 
 func (h *Hero) Step() {
-	h.nage += 1
-	if h.nage >= 365 {
-		h.nage = 0
-		h.age++
-	}
 
-	pos := rand.Intn(4)
-	switch pos {
-	case 0:
-		Up(h)
-	case 1:
-		Down(h)
-	case 2:
-		Left(h)
-	case 3:
-		Right(h)
-	}
 }
