@@ -2,19 +2,23 @@ package world
 
 import (
 	"encoding/json"
+	"github.com/DiscoreMe/magic-world/zone"
 	"os"
 )
 
 type exportWorld struct {
-	Days  int `json:"days"`
-	Years int `json:"years"`
+	Days  int          `json:"days"`
+	Years int          `json:"years"`
+	Zones []*zone.Zone `json:"zones"`
 }
 
 func (w *World) exportToJSON() ([]byte, error) {
 	var exportData = exportWorld{
 		Days:  w.days,
 		Years: w.years,
+		Zones: w.zones,
 	}
+
 	return json.Marshal(exportData)
 }
 
