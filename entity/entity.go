@@ -1,56 +1,41 @@
 package entity
 
-import (
-	"go.uber.org/atomic"
-)
+import uuid "github.com/satori/go.uuid"
 
 type Entity interface {
-	ID() int64
+	ID() uuid.UUID
 	Name() string
 	Health() int
-	X() int
-	Y() int
-	SetX(int)
-	SetY(int)
+	SetHealth(hp int)
 	Step()
+
+	// Damage returns the attack power
+	Damage() int
+	// Armour returns the armour power
+	Armour() int
+
+	AddXP(xp int)
 }
 
-var nextEntityID atomic.Int64
+func Attack(p1, p2 Entity) {
+	for {
+		Hit(p1, p2)
+		if p2.Health() <= 0 {
+			break
+		}
 
-func Up(ent Entity) {
-	ent.SetY(ent.Y() - 1)
-}
-func Down(ent Entity) {
-	ent.SetY(ent.Y() + 1)
-}
-func Left(ent Entity) {
-	ent.SetX(ent.X() - 1)
-}
-func Right(ent Entity) {
-	ent.SetX(ent.X() + 1)
-}
-
-type AroundPos struct {
-	UpX    int
-	UpY    int
-	DownX  int
-	DownY  int
-	LeftX  int
-	LeftY  int
-	RightX int
-	RightY int
-}
-
-func Around(ent Entity) AroundPos {
-	x, y := ent.X(), ent.Y()
-	return AroundPos{
-		UpX:    x,
-		UpY:    y - 1,
-		DownX:  x,
-		DownY:  y + 1,
-		LeftX:  x - 1,
-		LeftY:  y,
-		RightX: x + 1,
-		RightY: y,
+		Hit(p2, p1)
+		if p1.Health() <= 0 {
+			break
+		}
 	}
+}
+
+func Hit(p1, p2 Entity) {
+	var damage = -(p2.Armour() - p1.Damage())
+	if damage < 0 {
+		damage = 0
+	}
+
+	p2.SetHealth(p2.Health() - damage)
 }

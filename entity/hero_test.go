@@ -12,19 +12,11 @@ var hero *entity.Hero
 var heroName = gofakeit.Name()
 
 func init() {
-	hero = entity.NewHero(heroName)
+	hero = entity.NewHero(heroName, 10)
 }
 
 func TestHero_Name(t *testing.T) {
 	assert.Equal(t, hero.Name(), heroName)
-}
-
-func TestHero_Step(t *testing.T) {
-	age := hero.Age()
-	for i := 0; i <= 365; i++ {
-		hero.Step()
-	}
-	assert.True(t, age < hero.Age())
 }
 
 func TestHero_ID(t *testing.T) {
